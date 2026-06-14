@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Konfigurator zespołu AI — Etat</title>
+<meta name="description" content="Odpowiedz na kilka pytań o swojej firmie, a Etat w 2 minuty dobierze gotowy zespół pracowników AI z konkretnymi zadaniami i miesięczną pensją.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F4F0E6;--ink:#16170F;--green:#0C5C3D;--green-deep:#08482F;
+  --lime:#BFF14A;--lime-soft:#E4F7B0;--clay:#EAE3CE;--line:#D9D1BC;
+  --muted:#5E6657;--white:#FCFBF6;--r:14px;--r-lg:24px;--max:980px;
+  --shadow:6px 6px 0 var(--ink);--shadow-sm:3px 3px 0 var(--ink);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:var(--paper);color:var(--ink);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;min-height:100vh;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:var(--max);margin:0 auto;padding:0 24px}
+h1,h2,h3,.display{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;line-height:1.04;letter-spacing:-.02em}
+.mono{font-family:'JetBrains Mono',monospace}
+h1{font-size:clamp(28px,4.4vw,46px)}
+h2{font-size:clamp(24px,3.2vw,36px)}
+:focus-visible{outline:3px solid var(--green);outline-offset:3px;border-radius:4px}
+
+/* top bar */
+.bar{position:sticky;top:0;z-index:30;background:rgba(244,240,230,.9);backdrop-filter:blur(12px);border-bottom:2px solid var(--ink)}
+.bar-in{display:flex;align-items:center;justify-content:space-between;height:66px}
+.logo{font-family:'Bricolage Grotesque';font-weight:800;font-size:23px;letter-spacing:-.04em;display:flex;align-items:center;gap:8px}
+.logo .dot{width:11px;height:11px;background:var(--lime);border:2px solid var(--ink);border-radius:3px;transform:rotate(45deg)}
+.logo .tld{color:var(--green);font-size:.62em;font-weight:700;letter-spacing:-.02em;margin-left:-2px}
+.face{width:48px;height:48px;border:2.5px solid var(--ink);border-radius:13px;overflow:hidden;flex-shrink:0}
+.face svg{display:block;width:100%;height:100%}
+.back{font-size:14px;font-weight:500;color:var(--muted)}
+.back:hover{color:var(--ink)}
+
+/* progress */
+.prog-wrap{padding:30px 0 0}
+.prog-meta{display:flex;justify-content:space-between;font-family:'JetBrains Mono';font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.prog-track{height:10px;background:var(--clay);border:2px solid var(--ink);border-radius:999px;overflow:hidden}
+.prog-fill{height:100%;background:var(--lime);width:20%;transition:width .4s cubic-bezier(.4,0,.2,1)}
+
+/* stage */
+.stage{padding:42px 0 60px;min-height:60vh}
+.step{display:none;animation:fade .4s ease}
+.step.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.q-eyebrow{font-family:'JetBrains Mono';font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--green);margin-bottom:12px}
+.step h1{margin-bottom:10px}
+.step .sub{font-size:17px;color:var(--muted);margin-bottom:32px;max-width:560px}
+
+/* option grids */
+.opts{display:grid;gap:14px}
+.opts.cols-3{grid-template-columns:repeat(3,1fr)}
+.opts.cols-2{grid-template-columns:repeat(2,1fr)}
+.opt{background:var(--white);border:2.5px solid var(--ink);border-radius:16px;padding:22px;cursor:pointer;box-shadow:var(--shadow-sm);transition:transform .12s,box-shadow .12s,background .12s;display:flex;align-items:flex-start;gap:14px;text-align:left;font:inherit;color:inherit;width:100%}
+.opt:hover{transform:translate(-2px,-2px);box-shadow:5px 5px 0 var(--ink)}
+.opt .e{font-size:28px;line-height:1;flex-shrink:0}
+.opt b{font-family:'Bricolage Grotesque';font-weight:700;font-size:17px;display:block;margin-bottom:3px}
+.opt span{font-size:13px;color:var(--muted)}
+.opt.sel{background:var(--lime);transform:translate(-2px,-2px);box-shadow:5px 5px 0 var(--ink)}
+.opt .chk{margin-left:auto;width:24px;height:24px;border:2.5px solid var(--ink);border-radius:7px;flex-shrink:0;display:grid;place-items:center;font-weight:800;color:transparent;background:var(--white)}
+.opt.sel .chk{color:var(--ink);background:var(--white)}
+.opt.sel .chk::after{content:"✓"}
+
+/* text inputs */
+.field{margin-bottom:20px}
+.field label{font-family:'Bricolage Grotesque';font-weight:700;font-size:16px;display:block;margin-bottom:8px}
+.field input,.field textarea{width:100%;font-family:'Inter';font-size:16px;padding:15px 17px;border:2.5px solid var(--ink);border-radius:12px;background:var(--white);color:var(--ink);box-shadow:var(--shadow-sm)}
+.field textarea{min-height:96px;resize:vertical}
+.field input:focus,.field textarea:focus{outline:none;background:var(--lime-soft)}
+.field .hint{font-size:13px;color:var(--muted);margin-top:6px}
+
+/* nav buttons */
+.controls{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-top:38px}
+.btn{display:inline-flex;align-items:center;gap:10px;font-family:'Bricolage Grotesque';font-weight:700;font-size:16px;padding:14px 26px;border-radius:var(--r);border:2.5px solid var(--ink);cursor:pointer;transition:transform .12s,box-shadow .12s;background:var(--white);color:var(--ink);box-shadow:var(--shadow-sm)}
+.btn:hover{transform:translate(-2px,-2px);box-shadow:5px 5px 0 var(--ink)}
+.btn:active{transform:translate(1px,1px);box-shadow:1px 1px 0 var(--ink)}
+.btn-green{background:var(--green);color:var(--white)}
+.btn-lime{background:var(--lime)}
+.btn[disabled]{opacity:.4;cursor:not-allowed;box-shadow:none;transform:none}
+.btn-ghost{background:transparent;border-color:transparent;box-shadow:none;color:var(--muted);padding-left:6px}
+.btn-ghost:hover{box-shadow:none;transform:none;color:var(--ink)}
+
+/* result */
+.result{display:none}
+.result.on{display:block;animation:fade .5s ease}
+.res-head{text-align:center;max-width:620px;margin:0 auto 8px}
+.res-head .q-eyebrow{margin-bottom:14px}
+.profile{background:var(--green);color:var(--white);border:2.5px solid var(--ink);border-radius:var(--r-lg);padding:24px 28px;box-shadow:var(--shadow-sm);margin:34px 0 30px;display:flex;flex-wrap:wrap;gap:10px 30px;align-items:center}
+.profile .pi{display:flex;flex-direction:column}
+.profile .pi .l{font-family:'JetBrains Mono';font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--lime-soft)}
+.profile .pi .vv{font-family:'Bricolage Grotesque';font-weight:700;font-size:16px;margin-top:2px}
+.team{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.tcard{background:var(--white);border:2.5px solid var(--ink);border-radius:16px;padding:20px;box-shadow:var(--shadow-sm);display:flex;gap:14px;align-items:flex-start}
+.tcard .ic{width:44px;height:44px;border-radius:12px;border:2px solid var(--ink);display:grid;place-items:center;font-size:21px;flex-shrink:0}
+.tcard .nm{font-family:'Bricolage Grotesque';font-weight:700;font-size:16px}
+.tcard .role{font-family:'JetBrains Mono';font-size:10px;color:var(--muted);letter-spacing:.04em;margin:2px 0 7px}
+.tcard p{font-size:13px;color:var(--muted)}
+.tcard .sal{font-family:'JetBrains Mono';font-weight:700;font-size:14px;margin-top:9px}
+.bg1{background:#FFE2B0}.bg2{background:#C9E8FF}.bg3{background:var(--lime-soft)}.bg4{background:#FFD4D4}.bg5{background:#E3D6FF}.bg6{background:#CFEFE0}.bg7{background:#FFE9C2}.bg8{background:#D7E9FF}
+
+.summary{margin-top:26px;background:var(--ink);color:var(--paper);border:2.5px solid var(--ink);border-radius:var(--r-lg);padding:30px 32px;box-shadow:var(--shadow);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:22px}
+.summary .tot .l{font-family:'JetBrains Mono';font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#9AA292}
+.summary .tot .amt{font-family:'Bricolage Grotesque';font-weight:800;font-size:42px;line-height:1;color:var(--lime);margin-top:4px}
+.summary .tot .amt small{font-size:18px;color:var(--paper)}
+.summary .rec{font-size:13.5px;color:#C9CFC0;max-width:300px}
+.summary .rec b{color:var(--lime);font-family:'Bricolage Grotesque'}
+.res-cta{display:flex;gap:14px;justify-content:center;margin-top:34px;flex-wrap:wrap}
+.restart{text-align:center;margin-top:18px}
+.restart button{background:none;border:none;font-family:'Inter';font-size:14px;color:var(--muted);cursor:pointer;text-decoration:underline}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+@media(max-width:760px){
+  .stage{padding:30px 0 40px}
+  .opts.cols-3,.opts.cols-2{grid-template-columns:1fr}
+  .team{grid-template-columns:1fr}
+  .summary{flex-direction:column;align-items:flex-start;padding:26px 22px}
+  .step h1{font-size:30px}
+  .step .sub{font-size:16px;margin-bottom:26px}
+  .controls{position:sticky;bottom:0;margin-top:24px;padding:14px 0 16px;background:linear-gradient(to top,var(--paper) 72%,rgba(244,240,230,0))}
+  .controls .btn-green{flex:1;justify-content:center}
+  .res-cta{flex-direction:column}
+  .res-cta .btn{width:100%;justify-content:center}
+  .profile{gap:10px 22px;padding:22px}
+}
+@media(max-width:400px){
+  .wrap{padding:0 17px}
+  .opt{padding:17px;gap:12px}
+  .opt .e{font-size:24px}
+  .opt b{font-size:16px}
+  .step h1{font-size:27px}
+  .summary .tot .amt{font-size:34px}
+  .btn{padding:13px 17px;font-size:15px}
+  .logo{font-size:21px}
+  .field input,.field textarea{padding:13px 15px}
+}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="wrap bar-in">
+    <a href="index.html" class="logo"><span class="dot"></span>etat<span class="tld">.pro</span></a>
+    <a href="index.html" class="back">← Wróć do katalogu</a>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- PROGRESS -->
+  <div class="prog-wrap" id="progWrap">
+    <div class="prog-meta"><span id="progLabel">Krok 1 z 5</span><span id="progPct">20%</span></div>
+    <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
+  </div>
+
+  <div class="stage">
+
+    <!-- STEP 1: branża -->
+    <div class="step on" data-step="1">
+      <div class="q-eyebrow">Twoja firma</div>
+      <h1>Czym się zajmujesz?</h1>
+      <p class="sub">Wybierz branżę najbliższą Twojej — dobierzemy pracowników, którzy znają jej realia i słownictwo.</p>
+      <div class="opts cols-3" data-single="industry">
+        <button class="opt" data-val="gastro"><span class="e">🍽️</span><span><b>Gastronomia</b><span>restauracja, kawiarnia, catering</span></span></button>
+        <button class="opt" data-val="ecom"><span class="e">🛍️</span><span><b>E-commerce</b><span>sklep online, sprzedaż</span></span></button>
+        <button class="opt" data-val="uslugi"><span class="e">💇</span><span><b>Salon / usługi</b><span>fryzjer, kosmetyka, SPA</span></span></button>
+        <button class="opt" data-val="nieruch"><span class="e">🏠</span><span><b>Nieruchomości</b><span>agencja, pośrednictwo</span></span></button>
+        <button class="opt" data-val="ksiegowosc"><span class="e">🧾</span><span><b>Biuro / księgowość</b><span>doradztwo, finanse</span></span></button>
+        <button class="opt" data-val="rzemioslo"><span class="e">🔧</span><span><b>Usługi i rzemiosło</b><span>budowlanka, montaż, naprawy</span></span></button>
+      </div>
+    </div>
+
+    <!-- STEP 2: wielkość -->
+    <div class="step" data-step="2">
+      <div class="q-eyebrow">Skala</div>
+      <h1>Jak duża jest Twoja firma?</h1>
+      <p class="sub">To podpowie nam, jak duży zespół AI ma sens — i który plan będzie najtańszy w przeliczeniu.</p>
+      <div class="opts cols-3" data-single="size">
+        <button class="opt" data-val="solo"><span class="e">👤</span><span><b>Działam sam/sama</b><span>jednoosobowa firma</span></span></button>
+        <button class="opt" data-val="small"><span class="e">👥</span><span><b>Mały zespół</b><span>2–10 osób</span></span></button>
+        <button class="opt" data-val="mid"><span class="e">🏢</span><span><b>Większa firma</b><span>11–50 osób</span></span></button>
+      </div>
+    </div>
+
+    <!-- STEP 3: time sinks (multi) -->
+    <div class="step" data-step="3">
+      <div class="q-eyebrow">Wąskie gardła</div>
+      <h1>Co najbardziej pożera Twój czas?</h1>
+      <p class="sub">Zaznacz wszystko, co Cię zżera. Każdy wybór to jeden pracownik AI, którego dobierzemy do zespołu.</p>
+      <div class="opts cols-2" data-multi="pains">
+        <button class="opt" data-val="opinie"><span class="e">★</span><span><b>Opinie i reputacja</b><span>odpisywanie na recenzje</span></span><span class="chk"></span></button>
+        <button class="opt" data-val="social"><span class="e">◑</span><span><b>Social media</b><span>posty, treści, publikacje</span></span><span class="chk"></span></button>
+        <button class="opt" data-val="oferty"><span class="e">◆</span><span><b>Oferty i wyceny</b><span>przygotowywanie wycen</span></span><span class="chk"></span></button>
+        <button class="opt" data-val="faktury"><span class="e">▣</span><span><b>Faktury i papierologia</b><span>admin, dokumenty</span></span><span class="chk"></span></button>
+        <button class="opt" data-val="tresci"><span class="e">✎</span><span><b>Treści i SEO</b><span>opisy, blog, widoczność</span></span><span class="chk"></span></button>
+        <button class="opt" data-val="obsluga"><span class="e">☎</span><span><b>Maile i obsługa</b><span>odpowiadanie klientom</span></span><span class="chk"></span></button>
+        <button class="opt" data-val="grafik"><span class="e">📅</span><span><b>Umawianie i grafik</b><span>rezerwacje, przypomnienia</span></span><span class="chk"></span></button>
+        <button class="opt" data-val="leady"><span class="e">🎯</span><span><b>Pozyskiwanie klientów</b><span>leady, sprzedaż, follow-up</span></span><span class="chk"></span></button>
+      </div>
+    </div>
+
+    <!-- STEP 4: cel -->
+    <div class="step" data-step="4">
+      <div class="q-eyebrow">Cel</div>
+      <h1>Co chcesz osiągnąć najpierw?</h1>
+      <p class="sub">Ustawimy zespół tak, żeby najpierw popchnął właśnie to.</p>
+      <div class="opts cols-2" data-single="goal">
+        <button class="opt" data-val="klienci"><span class="e">📈</span><span><b>Więcej klientów</b><span>sprzedaż, widoczność, leady</span></span></button>
+        <button class="opt" data-val="czas"><span class="e">⏳</span><span><b>Odzyskać swój czas</b><span>mniej rutyny i papierów</span></span></button>
+        <button class="opt" data-val="koszty"><span class="e">💸</span><span><b>Obniżyć koszty</b><span>taniej niż kolejny etat</span></span></button>
+        <button class="opt" data-val="obsluga2"><span class="e">💬</span><span><b>Lepsza obsługa</b><span>szybsze odpowiedzi, opinie</span></span></button>
+      </div>
+    </div>
+
+    <!-- STEP 5: opis -->
+    <div class="step" data-step="5">
+      <div class="q-eyebrow">Ostatni szczegół</div>
+      <h1>Opowiedz nam o firmie w jednym zdaniu.</h1>
+      <p class="sub">To pomoże pracownikom AI złapać Twój kontekst od pierwszego dnia. Możesz pominąć.</p>
+      <div class="field">
+        <label for="fname">Nazwa firmy <span style="font-weight:400;color:var(--muted)">(opcjonalnie)</span></label>
+        <input id="fname" type="text" placeholder="np. Kawiarnia Dobra Strona">
+      </div>
+      <div class="field">
+        <label for="fdesc">Czym się zajmujecie? <span style="font-weight:400;color:var(--muted)">(opcjonalnie)</span></label>
+        <textarea id="fdesc" placeholder="np. Kameralna kawiarnia w centrum Krakowa, własna palarnia, dużo gości w weekendy i sporo opinii w Google."></textarea>
+        <div class="hint">Im konkretniej, tym lepiej Twój zespół AI trafi w ton i realia firmy.</div>
+      </div>
+    </div>
+
+    <!-- CONTROLS -->
+    <div class="controls" id="controls">
+      <button class="btn btn-ghost" id="prevBtn" style="visibility:hidden">← Wstecz</button>
+      <button class="btn btn-green" id="nextBtn" disabled>Dalej →</button>
+    </div>
+
+    <!-- RESULT -->
+    <div class="result" id="result">
+      <div class="res-head">
+        <div class="q-eyebrow">Twój zespół AI jest gotowy</div>
+        <h1 id="resTitle">Oto Twój pierwszy zespół AI.</h1>
+        <p class="sub" id="resSub" style="margin:10px auto 0">Dobraliśmy pracowników na podstawie Twoich odpowiedzi. Dorzuć lub usuń kogo chcesz po zatrudnieniu.</p>
+      </div>
+
+      <div class="profile" id="profile"></div>
+
+      <div class="team" id="team"></div>
+
+      <div class="summary">
+        <div class="tot">
+          <div class="l">Łączna pensja zespołu</div>
+          <div class="amt" id="totAmt">0 zł<small>/mies</small></div>
+        </div>
+        <div class="rec" id="recText"></div>
+      </div>
+
+      <div class="res-cta">
+        <a href="index.html#cennik" class="btn btn-lime">Zatrudnij ten zespół →</a>
+        <a href="https://salony-beauty-centrum-ai-964612819078.europe-west2.run.app/" target="_blank" rel="noopener" class="btn btn-green">Wejdź do Biura AI</a>
+        <a href="index.html#katalog" class="btn">Zobacz cały katalog</a>
+      </div>
+      <div class="restart"><button id="restartBtn">↺ Zacznij konfigurator od nowa</button></div>
+    </div>
+
+  </div>
+</div>
+<script>
+// --- biblioteka twarzy pracowników AI (autorskie awatary SVG) ---
+const AV={
+  opinie:{bg:'#FFE2B0',skin:'#F2C9A0',cloth:'#0C5C3D',extra:`<path d="M18 25 Q18 12 32 12 Q46 12 46 25 Q46 18 32 18 Q18 18 18 25 Z" fill="#6B4A2B" stroke="#16170F" stroke-width="2.5" stroke-linejoin="round"/><path d="M18 24 L18 41 Q21 43 23 41 L23 25 Z" fill="#6B4A2B" stroke="#16170F" stroke-width="2.2" stroke-linejoin="round"/><path d="M46 24 L46 41 Q43 43 41 41 L41 25 Z" fill="#6B4A2B" stroke="#16170F" stroke-width="2.2" stroke-linejoin="round"/><path d="M18.5 37 l1.7 -3.2 1.7 3.2 Z" fill="#BFF14A" stroke="#16170F" stroke-width="1"/>`},
+  social:{bg:'#C9E8FF',skin:'#E0A878',cloth:'#3A4D6B',extra:`<path d="M17 24 Q17 10 32 10 Q47 10 47 24 Z" fill="#BFF14A" stroke="#16170F" stroke-width="2.5" stroke-linejoin="round"/><rect x="16" y="22" width="32" height="6" rx="3" fill="#BFF14A" stroke="#16170F" stroke-width="2.5"/><circle cx="32" cy="9" r="2.4" fill="#BFF14A" stroke="#16170F" stroke-width="2"/>`},
+  oferty:{bg:'#E4F7B0',skin:'#E8B98C',cloth:'#8A6D2E',extra:`<circle cx="32" cy="12" r="6" fill="#3A2E22" stroke="#16170F" stroke-width="2.5"/><path d="M19 24 Q19 13 32 13 Q45 13 45 24 Q45 18 32 18 Q19 18 19 24 Z" fill="#3A2E22" stroke="#16170F" stroke-width="2.5" stroke-linejoin="round"/><circle cx="27" cy="30" r="4" fill="#FCFBF6" stroke="#16170F" stroke-width="1.8"/><circle cx="37" cy="30" r="4" fill="#FCFBF6" stroke="#16170F" stroke-width="1.8"/><path d="M31 30 h2" stroke="#16170F" stroke-width="1.8"/><circle cx="27" cy="30" r="1.4" fill="#16170F"/><circle cx="37" cy="30" r="1.4" fill="#16170F"/>`},
+  faktury:{bg:'#FFD4D4',skin:'#F2C9A0',cloth:'#5E6657',extra:`<path d="M18 25 Q18 13 32 13 Q46 13 46 25 Q46 19 32 19 Q18 19 18 25 Z" fill="#4A3724" stroke="#16170F" stroke-width="2.5" stroke-linejoin="round"/><circle cx="27" cy="30" r="4" fill="#FCFBF6" stroke="#16170F" stroke-width="1.8"/><circle cx="37" cy="30" r="4" fill="#FCFBF6" stroke="#16170F" stroke-width="1.8"/><path d="M31 30 h2" stroke="#16170F" stroke-width="1.8"/><circle cx="27" cy="30" r="1.4" fill="#16170F"/><circle cx="37" cy="30" r="1.4" fill="#16170F"/>`},
+  tresci:{bg:'#E3D6FF',skin:'#C98B5E',cloth:'#6B4E8A',extra:`<path d="M18 24 L18 40 Q20 42 22 40 L22 24 Z" fill="#1F1A14" stroke="#16170F" stroke-width="2.2" stroke-linejoin="round"/><path d="M46 24 L46 40 Q44 42 42 40 L42 24 Z" fill="#1F1A14" stroke="#16170F" stroke-width="2.2" stroke-linejoin="round"/><path d="M18 26 Q18 12 32 12 Q46 12 46 26 L46 23 Q40 21 32 21 Q24 21 18 23 Z" fill="#1F1A14" stroke="#16170F" stroke-width="2.5" stroke-linejoin="round"/>`},
+  obsluga:{bg:'#CFEFE0',skin:'#8D5A3B',cloth:'#0C5C3D',extra:`<path d="M19 24 Q19 14 32 14 Q45 14 45 24 Q45 19 32 19 Q19 19 19 24 Z" fill="#15110C" stroke="#16170F" stroke-width="2.4" stroke-linejoin="round"/><path d="M19 28 Q19 13 32 13 Q45 13 45 28" fill="none" stroke="#16170F" stroke-width="3" stroke-linecap="round"/><rect x="15.5" y="27" width="5.5" height="9" rx="2.5" fill="#16170F"/><rect x="43" y="27" width="5.5" height="9" rx="2.5" fill="#16170F"/><path d="M44 33 Q50 35 48 41" fill="none" stroke="#16170F" stroke-width="2.4" stroke-linecap="round"/><circle cx="47.5" cy="41" r="2" fill="#0C5C3D" stroke="#16170F" stroke-width="1.5"/>`},
+  grafik:{bg:'#FFE9C2',skin:'#F2C9A0',cloth:'#B07A2E',extra:`<path d="M18 25 Q18 13 32 13 Q46 13 46 25 Q46 18 32 18 Q18 18 18 25 Z" fill="#5A3D22" stroke="#16170F" stroke-width="2.5" stroke-linejoin="round"/><path d="M44 20 Q54 25 50 41 Q45 39 43 28 Z" fill="#5A3D22" stroke="#16170F" stroke-width="2.4" stroke-linejoin="round"/><rect x="42.5" y="22" width="6" height="4" rx="2" fill="#BFF14A" stroke="#16170F" stroke-width="1.5"/>`},
+  leady:{bg:'#D7E9FF',skin:'#C98B5E',cloth:'#2F5168',extra:`<path d="M18 25 Q18 13 32 13 Q46 13 46 25 Q46 19 32 19 Q18 19 18 25 Z" fill="#2A2018" stroke="#16170F" stroke-width="2.5" stroke-linejoin="round"/><path d="M22 38 Q22 47 32 47 Q42 47 42 38 Q38 42 32 42 Q26 42 22 38 Z" fill="#2A2018" stroke="#16170F" stroke-width="2.4" stroke-linejoin="round"/>`}
+};
+function faceSVG(k){const p=AV[k];if(!p)return'';return `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Awatar pracownika AI"><rect x="28.5" y="40" width="7" height="8" fill="${p.skin}"/><path d="M12 64 L12 56 Q12 47 26 45 L38 45 Q52 47 52 56 L52 64 Z" fill="${p.cloth}" stroke="#16170F" stroke-width="2.5" stroke-linejoin="round"/><rect x="20" y="17" width="24" height="27" rx="11" fill="${p.skin}" stroke="#16170F" stroke-width="2.5"/><circle cx="27" cy="30" r="1.8" fill="#16170F"/><circle cx="37" cy="30" r="1.8" fill="#16170F"/><path d="M28 37 Q32 40.5 36 37" stroke="#16170F" stroke-width="2.2" stroke-linecap="round"/>${p.extra}</svg>`;}
+
+// --- katalog pracowników ---
+const WORKERS={
+  opinie:{nm:"Marta od opinii",role:"REPUTACJA ONLINE",ic:"★",bg:"bg1",pln:99,d:"Odpisuje na opinie w Google i social Twoim tonem, eskaluje trudne, raportuje nastroje klientów."},
+  social:{nm:"Tomek od social media",role:"TREŚCI · SOCIAL",ic:"◑",bg:"bg2",pln:149,d:"Planuje i pisze posty na cały miesiąc pod Twoją branżę, dobiera terminy i hasła."},
+  oferty:{nm:"Kasia od ofert",role:"SPRZEDAŻ · WYCENY",ic:"◆",bg:"bg3",pln:149,d:"Z notatki albo maila robi gotową ofertę i wycenę. Pilnuje, by żadne zapytanie nie przepadło."},
+  faktury:{nm:"Adam od faktur",role:"ADMIN · FINANSE",ic:"▣",bg:"bg4",pln:129,d:"Wystawia i opisuje faktury, przypomina o płatnościach, porządkuje dokumenty na księgowość."},
+  tresci:{nm:"Ola od treści i SEO",role:"STRONA · SEO",ic:"✎",bg:"bg5",pln:169,d:"Pisze opisy, wpisy na blog i teksty pod frazy, których szukają Twoi klienci."},
+  obsluga:{nm:"Piotr od obsługi",role:"OBSŁUGA KLIENTA",ic:"☎",bg:"bg6",pln:179,d:"Odpowiada na maile i wiadomości w kilka minut, zna ofertę, umawia spotkania."},
+  grafik:{nm:"Ewa od kalendarza",role:"REZERWACJE · GRAFIK",ic:"📅",bg:"bg7",pln:119,d:"Umawia wizyty, wysyła przypomnienia, ogranicza nieodwołane terminy i puste okienka."},
+  leady:{nm:"Bartek od leadów",role:"POZYSKANIE KLIENTÓW",ic:"🎯",bg:"bg8",pln:159,d:"Zbiera i kwalifikuje zapytania, prowadzi follow-up, pilnuje, żeby leady nie stygły."}
+};
+const INDUSTRY={gastro:"Gastronomia",ecom:"E-commerce",uslugi:"Salon / usługi",nieruch:"Nieruchomości",ksiegowosc:"Biuro / księgowość",rzemioslo:"Usługi i rzemiosło"};
+const SIZE={solo:"Jednoosobowa",small:"2–10 osób",mid:"11–50 osób"};
+const GOAL={klienci:"Więcej klientów",czas:"Odzyskać czas",koszty:"Obniżyć koszty",obsluga2:"Lepsza obsługa"};
+// branżowy dodatek, jeśli klient nie zaznaczył sam
+const INDUSTRY_PICK={gastro:"opinie",ecom:"tresci",uslugi:"grafik",nieruch:"leady",ksiegowosc:"faktury",rzemioslo:"oferty"};
+const GOAL_PICK={klienci:"leady",czas:"faktury",koszty:"obsluga",obsluga2:"obsluga"};
+
+const state={industry:null,size:null,pains:[],goal:null};
+let step=1;const TOTAL=5;
+
+const fill=document.getElementById('progFill'),pLabel=document.getElementById('progLabel'),pPct=document.getElementById('progPct');
+const nextBtn=document.getElementById('nextBtn'),prevBtn=document.getElementById('prevBtn');
+const controls=document.getElementById('controls'),progWrap=document.getElementById('progWrap');
+
+function updateProgress(){const pct=Math.round(step/TOTAL*100);fill.style.width=pct+'%';pLabel.textContent='Krok '+step+' z '+TOTAL;pPct.textContent=pct+'%';}
+function showStep(n){document.querySelectorAll('.step').forEach(s=>s.classList.toggle('on',+s.dataset.step===n));prevBtn.style.visibility=n>1?'visible':'hidden';nextBtn.textContent=n===TOTAL?'Zbuduj mój zespół →':'Dalej →';updateProgress();validate();window.scrollTo({top:0,behavior:'smooth'});}
+
+// selections
+document.querySelectorAll('[data-single]').forEach(grp=>{
+  const key=grp.dataset.single;
+  grp.querySelectorAll('.opt').forEach(o=>o.addEventListener('click',()=>{
+    grp.querySelectorAll('.opt').forEach(x=>x.classList.remove('sel'));
+    o.classList.add('sel');state[key]=o.dataset.val;validate();
+  }));
+});
+document.querySelectorAll('[data-multi]').forEach(grp=>{
+  const key=grp.dataset.multi;
+  grp.querySelectorAll('.opt').forEach(o=>o.addEventListener('click',()=>{
+    o.classList.toggle('sel');
+    const v=o.dataset.val;
+    if(o.classList.contains('sel'))state[key].push(v);else state[key]=state[key].filter(x=>x!==v);
+    validate();
+  }));
+});
+
+function validate(){
+  let ok=true;
+  if(step===1)ok=!!state.industry;
+  else if(step===2)ok=!!state.size;
+  else if(step===3)ok=state.pains.length>0;
+  else if(step===4)ok=!!state.goal;
+  else if(step===5)ok=true;
+  nextBtn.disabled=!ok;
+}
+
+nextBtn.addEventListener('click',()=>{if(nextBtn.disabled)return;if(step<TOTAL){step++;showStep(step);}else{buildResult();}});
+prevBtn.addEventListener('click',()=>{if(step>1){step--;showStep(step);}});
+
+function buildResult(){
+  // dobór zespołu: zaznaczone bóle + branżowy + celowy, deduplikacja, max 5
+  let picks=[...state.pains];
+  const add=k=>{if(k&&!picks.includes(k))picks.push(k);};
+  add(INDUSTRY_PICK[state.industry]);
+  add(GOAL_PICK[state.goal]);
+  picks=picks.slice(0,5);
+
+  // render profilu
+  const fname=document.getElementById('fname').value.trim();
+  const prof=document.getElementById('profile');
+  const items=[
+    ['Firma',fname||INDUSTRY[state.industry]],
+    ['Branża',INDUSTRY[state.industry]],
+    ['Skala',SIZE[state.size]],
+    ['Cel',GOAL[state.goal]]
+  ];
+  prof.innerHTML=items.map(([l,v])=>`<div class="pi"><span class="l">${l}</span><span class="vv">${v}</span></div>`).join('');
+
+  // render zespołu
+  const team=document.getElementById('team');
+  let total=0;
+  team.innerHTML=picks.map(k=>{const w=WORKERS[k];total+=w.pln;return `<div class="tcard"><div class="face" style="background:${AV[k].bg}">${faceSVG(k)}</div><div><div class="nm">${w.nm}</div><div class="role">${w.role}</div><p>${w.d}</p><div class="sal">${w.pln} zł <span style="color:var(--muted);font-weight:500">/mies</span></div></div></div>`;}).join('');
+
+  // suma + rekomendacja planu
+  document.getElementById('totAmt').innerHTML=total+' zł<small>/mies</small>';
+  let rec;
+  if(picks.length<=3){rec=`Przy ${picks.length} pracownikach najtaniej wyjdziesz na planie <b>Solo (99 zł/mies)</b> — mieścisz się w limicie 3 stanowisk.`;}
+  else if(state.size==='mid'){rec=`Przy tej skali i ${picks.length} pracownikach polecamy plan <b>Zespół (699 zł/mies)</b> — cały katalog i wielu użytkowników.`;}
+  else{rec=`Przy ${picks.length} pracownikach plan <b>Branża (299 zł/mies)</b> wychodzi taniej niż pojedyncze pensje — i dorzuca cały pakiet Twojej branży.`;}
+  document.getElementById('recText').innerHTML=rec;
+
+  // tytuł
+  const fd=document.getElementById('fdesc').value.trim();
+  document.getElementById('resTitle').textContent=fname?`Zespół AI dla: ${fname}`:'Oto Twój pierwszy zespół AI.';
+  if(fd)document.getElementById('resSub').textContent='Pracownicy dostaną ten kontekst na start: „'+fd+'"';
+
+  // pokaż wynik
+  document.querySelectorAll('.step').forEach(s=>s.classList.remove('on'));
+  controls.style.display='none';progWrap.style.display='none';
+  document.getElementById('result').classList.add('on');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+document.getElementById('restartBtn').addEventListener('click',()=>{
+  state.industry=null;state.size=null;state.pains=[];state.goal=null;
+  document.querySelectorAll('.opt.sel').forEach(o=>o.classList.remove('sel'));
+  document.getElementById('fname').value='';document.getElementById('fdesc').value='';
+  document.getElementById('result').classList.remove('on');
+  controls.style.display='flex';progWrap.style.display='block';
+  step=1;showStep(1);
+});
+
+showStep(1);
+</script>
+</body>
+</html>
